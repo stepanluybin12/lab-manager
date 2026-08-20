@@ -1,42 +1,88 @@
-# lsndv
+# Система приема и выдачи лабораторных работ
 
-This template should help get you started developing with Vue 3 in Vite.
+## Обзор проекта
 
-## Recommended IDE Setup
+Веб-приложение для управления лабораторными работами, разработанное на Vue 3. Система поддерживает две роли: **Преподаватель** и **Студент**.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+### Основные возможности
 
-## Recommended Browser Setup
+#### Для преподавателя:
+- Создание и управление группами студентов
+- Создание лабораторных работ с прикреплением файлов
+- Просмотр всех сданных работ студентов
+- Проверка работ с выставлением оценки и комментария
+- Взятие работ на проверку
+- Продление дедлайна
+- Удаление работ
+- Скачивание файлов студентов и файлов задания
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+#### Для студента:
+- Просмотр доступных лабораторных работ (только по своей группе)
+- Загрузка выполненной работы
+- Отправка работы на проверку
+- Отслеживание статуса сдачи:
+  - **Прикреплена** – файл загружен
+  - **На проверке** – работа отправлена преподавателю
+  - **Проверяется** – преподаватель взял работу на проверку
+  - **Оценена** – работа проверена, выставлена оценка
+  - **Просрочена** – дедлайн истек
 
-## Type Support for `.vue` Imports in TS
+---
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Технологический стек
 
-## Customize configuration
+- **Vue 3** (Composition API)
+- **Vite** – сборщик
+- **Vue Router** – маршрутизация
+- **Fetch API** – работа с сервером
+- **CSS** (scoped)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
-## Project Setup
+## Структура проекта
 
-```sh
-npm install
-```
+lab_system_final/
+├── .env                           # Переменные окружения (VITE_USE_MOCK, VITE_API_URL)
+├── index.html                     # Главная HTML-страница (точка входа)
+├── package.json                   # Зависимости и скрипты
+├── vite.config.js                 # Конфигурация Vite
+├── README.md                      # Общая информация о проекте
+└── src/
+    ├── App.vue                    # Корневой компонент приложения (содержит <router-view />)
+    ├── main.js                    # Точка входа приложения (создание Vue-приложения, подключение роутера)
+    │
+    ├── api/                       # Модули для взаимодействия с бэкендом
+    │   ├── auth.js                # Аутентификация: login(), getProfile()
+    │   ├── groups.js              # Работа с группами: getGroups()
+    │   ├── works.js               # Работа с лабораторными работами и сдачами:
+    │   │                         # getWorksByGroup, getWorkById, createWork, submitWork,
+    │   │                         # getSubmissionsByWork, getSubmissionByWorkAndStudent,
+    │   │                         # gradeSubmission, takeToReview, deleteWork, extendDeadline,
+    │   │                         # downloadSubmission
+    │   ├── fetchWithAuth.js       # Обёртка над fetch с автоматической подстановкой JWT-токена
+    │   └── mocks.js               # Мок-данные и имитация API для разработки без бэкенда
+    │
+    ├── components/                # Переиспользуемые Vue-компоненты
+    │   ├── AppMenu.vue            # Главное навигационное меню (отображается на всех страницах, кроме логина)
+    │   └── StatusBadge.vue        # Компонент для отображения статуса сдачи с цветовой индикацией
+    │
+    ├── composables/               # Композиционные функции (React-подобные хуки)
+    │   └── useStore.js            # Глобальное хранилище состояния (user, token, role, groups, works, submissions)
+    │
+    ├── router/                    # Настройка маршрутизации
+    │   └── index.js               # Определение маршрутов, глобальный guard для проверки авторизации и ролей
+    │
+    ├── views/                     # Компоненты страниц
+    │   ├── LoginView.vue          # Страница входа (логин/пароль)
+    │   ├── DashboardView.vue      # Главная страница после входа (дашборд)
+    │   │                         # Для преподавателя: список групп с поиском
+    │   │                         # Для студента: список его работ (фильтр по группе)
+    │   ├── GroupWorksView.vue     # Страница со списком лабораторных работ выбранной группы
+    │   │                         # (доступна только преподавателю)
+    │   ├── WorkDetailView.vue     # Детальная страница лабораторной работы
+    │   │                         # Преподаватель: таблица сдач студентов, оценивание, управление
+    │   │                         # Студент: своя сдача, форма загрузки файла
+    │   └── CreateWorkView.vue     # Страница создания новой лабораторной работы (только преподаватель)
+    │
+    └── styles/                    # (опционально) глобальные стили, если есть
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
